@@ -1,3 +1,23 @@
+const TIMER_STATE = {
+    STOPPED: 'STOPPED',
+    PAUSED: 'PAUSED',
+    RUNNING: 'RUNNING',
+}
+
+
+const INITIAL_SESSION_LENGTH_MIN = 25;
+const INITIAL_BREAK_LENGTH_MIN = 5;
+const MAX_BEEP_COUNTER = 3;
+
+const INITIAL_STATE = {
+    timerState: TIMER_STATE.STOPPED,
+    timeLeft: INITIAL_SESSION_LENGTH_MIN * 60,
+    activeTimer: 'Session',
+    sessionLength: INITIAL_SESSION_LENGTH_MIN,
+    breakLength: INITIAL_BREAK_LENGTH_MIN,
+    beepCounter: -1
+}
+
 
 const incrementBreak = () => {
     return {
@@ -29,15 +49,15 @@ const switchActive = () => {
     }
 }
 
-const play = () => {
+const countDown = () => {
     return {
-        type: 'PLAY'
+        type: 'COUNT_DOWN'
     }
 }
 
-const pause = () => {
+const startStop = () => {
     return {
-        type: 'PAUSE'
+        type: 'START_STOP'
     }
 }
 
@@ -47,49 +67,83 @@ const reset = () => {
     }
 }
 
-const breakReducer = (state = 5, action) => {
+const timeReducer = (state = INITIAL_STATE, action) => {
+    let newState = { ...state }
+    console.log(state)
     switch (action.type) {
         case 'INCREMENT_BREAK':
-            return state + 1
-
+            if (newState.timerState != TIMER_STATE.RUNNING) {
+                newState.breakLength = newState.breakLength < 60 ? newState.breakLength + 1 : 60;
+                if (newState.activeTimer == 'Break') {
+                    newState.timeLeft = newState.breakLength * 60;
+                }
+            }
+            break;
         case 'DECREMENT_BREAK':
-            return state > 1 ? state - 1 : 1
-        default:
-            return state
-    }
-}
-
-const sessionReducer = (state = 25, action) => {
-    switch (action.type) {
+            if (newState.timerState != TIMER_STATE.RUNNING) {
+                newState.breakLength = newState.breakLength > 1 ? newState.breakLength - 1 : 1
+                if (newState.activeTimer == 'Break') {
+                    newState.timeLeft = newState.breakLength * 60;
+                }
+            }
+            break;
         case 'INCREMENT_SESSION':
-            return state + 1
-
+            if (newState.timerState != TIMER_STATE.RUNNING) {
+                newState.sessionLength = newState.sessionLength < 60 ? newState.sessionLength + 1 : 60
+                if (newState.activeTimer == 'Session') {
+                    newState.timeLeft = newState.sessionLength * 60;
+                }
+            }
+            break;
         case 'DECREMENT_SESSION':
-            return state > 1 ? state - 1 : 1
-        default:
-            return state
+            if (newState.timerState != TIMER_STATE.RUNNING) {
+                newState.sessionLength = newState.sessionLength > 1 ? newState.sessionLength - 1 : 1
+                if (newState.activeTimer == 'Session') {
+                    newState.timeLeft = newState.sessionLength * 60;
+                }
+            }
+            break;
+        case 'COUNT_DOWN':
+            if (newState.timerState == TIMER_STATE.RUNNING) {
+                if (newState.beepCounter >= 0) {
+                    newState.beepCounter += 1;
+                }
+                if (newState.beepCounter >= MAX_BEEP_COUNTER) {
+                    newState.beepCounter = -1;
+                }
+                if (newState.timeLeft == 1) {
+                    newState.beepCounter = 0;
+                }
+                if (newState.timeLeft == 0) {
+                    newState.activeTimer = newState.activeTimer == 'Session' ? 'Break' : 'Session';
+                    newState.timeLeft = (newState.activeTimer == 'Session' ? newState.sessionLength : newState.breakLength) * 60;
+                } else {
+                    newState.timeLeft -= 1
+                }
+            }
+            break;
+        case 'START_STOP':
+            switch (newState.timerState) {
+                case TIMER_STATE.STOPPED:
+                    newState.timerState = TIMER_STATE.RUNNING
+                    newState.timeLeft = (newState.activeTimer == 'Session' ? newState.sessionLength : newState.breakLength) * 60;
+                    break;
+                case TIMER_STATE.RUNNING:
+                    newState.timerState = TIMER_STATE.PAUSED
+                    break;
+                case TIMER_STATE.PAUSED:
+                    newState.timerState = TIMER_STATE.RUNNING
+                    break;
+            }
+            break;
+        case 'RESET':
+            newState.timerState = TIMER_STATE.STOPPED;
+            newState.timeLeft = newState.sessionLength * 60;
+            newState.activeTimer = 'Session';
+            newState.beepCounter = -1;
     }
+
+    return newState;
 }
 
-const activeReducer = (state = 'Session', action) => {
-    switch (action.type) {
-        case 'SWITCH_ACTIVE':
-            return state == 'Session' ? 'Break' : 'Session'
-        default:
-            return state
-    }
-}
-
-const timeReducer = (state = 25, action) => {
-    return state
-}
-
-const rootReducer = Redux.combineReducers({
-    breakLength: breakReducer,
-    sessionLength: sessionReducer,
-    timeLeft: timeReducer,
-    currentlyActive: activeReducer
-});
-
-
-const store = Redux.createStore(rootReducer);
+const store = Redux.createStore(timeReducer);

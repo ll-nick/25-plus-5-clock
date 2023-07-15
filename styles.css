@@ -4,6 +4,8 @@
 
 body {
     margin: 0;
+    color: white;
+    font-family: sans-serif;
 }
 
 #app-wrapper {
@@ -12,4 +14,82 @@ body {
     justify-content: center;
     align-items: center;
     background-color: #1e555c;
+}
+
+#container {
+    display: grid;
+    grid-template-areas:
+        "title title"
+        "break session"
+        "timer timer"
+        "controls controls";
+    gap: 10px;
+}
+
+#title {
+    grid-area: title;
+    text-align: center;
+    font-size: 60px;
+    margin: 10px;
+}
+
+.timer-setter-container {
+    text-align: center;
+    font-size: 30px;
+    margin: 10px;
+}
+
+#break-container {
+    grid-area: break;
+}
+
+#session-container {
+    grid-area: session;
+}
+
+.time-setter-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.time-setter-buttons>.button {
+    margin: 0 10px;
+}
+
+.button {
+    color: white;
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#timer {
+    grid-area: timer;
+    border: 7px solid #13353a;
+    border-radius: 50px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#time-left,
+#timer-label {
+    margin: 10px;
+}
+
+#timer-label {
+    font-size: 30px;
+}
+
+#time-left {
+    font-size: 50px;
+}
+
+#controls {
+    grid-area: controls;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
