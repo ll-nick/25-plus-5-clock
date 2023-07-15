@@ -52,11 +52,8 @@ class Timer extends React.Component {
     componentDidMount() {
         this.timer = setInterval(() => {
             this.props.countDown();
-            if (this.props.beepCounter == 0) {
+            if (this.props.timeLeft == 0) {
                 document.getElementById("beep").play()
-            } else if (this.props.beepCounter == -1) {
-                document.getElementById("beep").pause()
-                document.getElementById("beep").currentTime = 0;
             }
         }, 1000);
     }
@@ -80,6 +77,13 @@ class Timer extends React.Component {
 class Controls extends React.Component {
     constructor(props) {
         super(props);
+        this.reset = this.reset.bind(this)
+    }
+
+    reset() {
+        this.props.reset()
+        document.getElementById("beep").pause()
+        document.getElementById("beep").currentTime = 0;
     }
 
     render() {
@@ -89,7 +93,7 @@ class Controls extends React.Component {
                     <i className="fa fa-play fa-2x"></i>
                     <i className="fa fa-pause fa-2x"></i>
                 </button>
-                <button id="reset" className="button" onClick={this.props.reset}>
+                <button id="reset" className="button" onClick={this.reset}>
                     <i className="fa fa-refresh fa-2x"></i>
                 </button>
             </div>
@@ -135,8 +139,7 @@ const sessionMapDispatchToProps = (dispatch) => {
 const timerMapStateToProps = (state) => {
     return {
         activeTimer: state.activeTimer,
-        timeLeft: state.timeLeft,
-        beepCounter: state.beepCounter
+        timeLeft: state.timeLeft
     }
 };
 

@@ -4,10 +4,8 @@ const TIMER_STATE = {
     RUNNING: 'RUNNING',
 }
 
-
 const INITIAL_SESSION_LENGTH_MIN = 25;
 const INITIAL_BREAK_LENGTH_MIN = 5;
-const MAX_BEEP_COUNTER = 3;
 
 const INITIAL_STATE = {
     timerState: TIMER_STATE.STOPPED,
@@ -15,7 +13,6 @@ const INITIAL_STATE = {
     activeTimer: 'Session',
     sessionLength: INITIAL_SESSION_LENGTH_MIN,
     breakLength: INITIAL_BREAK_LENGTH_MIN,
-    beepCounter: -1
 }
 
 
@@ -105,15 +102,6 @@ const timeReducer = (state = INITIAL_STATE, action) => {
             break;
         case 'COUNT_DOWN':
             if (newState.timerState == TIMER_STATE.RUNNING) {
-                if (newState.beepCounter >= 0) {
-                    newState.beepCounter += 1;
-                }
-                if (newState.beepCounter >= MAX_BEEP_COUNTER) {
-                    newState.beepCounter = -1;
-                }
-                if (newState.timeLeft == 1) {
-                    newState.beepCounter = 0;
-                }
                 if (newState.timeLeft == 0) {
                     newState.activeTimer = newState.activeTimer == 'Session' ? 'Break' : 'Session';
                     newState.timeLeft = (newState.activeTimer == 'Session' ? newState.sessionLength : newState.breakLength) * 60;
@@ -137,10 +125,7 @@ const timeReducer = (state = INITIAL_STATE, action) => {
             }
             break;
         case 'RESET':
-            newState.timerState = TIMER_STATE.STOPPED;
-            newState.timeLeft = newState.sessionLength * 60;
-            newState.activeTimer = 'Session';
-            newState.beepCounter = -1;
+            newState = INITIAL_STATE
     }
 
     return newState;
